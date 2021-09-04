@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "lihim-gui"
+version = "0.1.0"
+description = "Web browser-based GUI for lihim."
+authors = ["Neil Van <nvq.alino@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+Flask = "^2.0.1"
+
+[tool.poetry.dev-dependencies]
+lihim = "^1.0.2"
+pytest = "^6.2.5"
+black = "^21.8b0"
+mypy = "^0.910"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+gui  = "lihim_gui:app.run"
