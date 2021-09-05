@@ -1,12 +1,8 @@
-from flask import Flask
+from flask import Flask, current_app
 
-app = Flask(__name__, template_folder="templates", static_folder="static")
+app = Flask(__name__, static_folder="prod_app")
 
 
 @app.route("/")
 def hello_world():
-    return "hi"
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
+    return current_app.send_static_file("index.html")
