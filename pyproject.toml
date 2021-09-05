@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "lihim-gui"
 version = "0.1.0"
-description = "Web browser-based GUI for lihim."
+description = "GUI for lihim. Web browser-based interface built with Flask and Vue.js"
 authors = ["Neil Van <nvq.alino@gmail.com>"]
 license = "MIT"
 
@@ -20,4 +20,4 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-gui  = "lihim_gui:app.run"
+lihim-gui  = "lihim_gui.app:app.run"
