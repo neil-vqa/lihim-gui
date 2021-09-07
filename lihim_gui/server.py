@@ -11,5 +11,5 @@ def start():
     if args.develop:
         app.run(debug=True)
     else:
-        webbrowser.open_new("http://127.0.0.1:5000/")
+        webbrowser.open_new("localhost:5000")
         app.run()
