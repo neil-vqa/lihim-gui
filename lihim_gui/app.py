@@ -1,4 +1,4 @@
-from flask import Flask, current_app, request, jsonify
+from flask import Flask, current_app, request, jsonify, session
 from lihim import controller
 
 app = Flask(__name__, static_folder="prod_app")
@@ -20,6 +20,7 @@ def login():
         current_user = controller.get_user(username)
         controller.check_password(current_user, password)
         controller.check_key_exists(key)
+        session["username"] = username
         return jsonify("ok!")
     except Exception as e:
         return jsonify(str(e))
@@ -27,6 +28,7 @@ def login():
 
 @app.route("/api/logout", methods=["POST"])
 def logout():
+    session.pop("username", None)
     return jsonify("ok!")
 
 
