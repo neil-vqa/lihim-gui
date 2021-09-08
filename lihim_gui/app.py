@@ -1,5 +1,5 @@
-from flask import Flask, current_app, request, jsonify
-from lihim import controller
+from flask import Flask, current_app, request, jsonify, session
+from lihim import controller, models
 
 app = Flask(__name__, static_folder="prod_app")
 
@@ -20,6 +20,8 @@ def login():
         current_user = controller.get_user(username)
         controller.check_password(current_user, password)
         controller.check_key_exists(key)
+        session["username"] = username
+        session["key"] = key
         return jsonify("ok!")
     except Exception as e:
         return jsonify(str(e))
@@ -27,9 +29,37 @@ def login():
 
 @app.route("/api/logout", methods=["POST"])
 def logout():
-    return jsonify("ok!")
+    try:
+        session.pop("username", None)
+        session.pop("key", None)
+        return jsonify("ok!")
+    except Exception as e:
+        return jsonify(str(e))
 
 
+@app.route("/api/users", methods=["GET", "POST"])
 def users():
-    """Create user, check users, delete user"""
+    """Check users, create a user"""
+
+    try:
+        if request.method == "GET":
+            users = [user.username for user in controller.check_users()]
+            return jsonify(users)
+        elif request.method == "POST":
+            request_data = request.get_json()
+            username = request_data["username"]
+            password = request_data["password"]
+            key_path = request_data["key_path"]
+            key_name = request_data["key_name"]
+
+            key = models.create_key(key_path, key_name, username)
+            controller.create_user(username, password, key)
+
+            return jsonify("ok!")
+    except Exception as e:
+        return jsonify(str(e))
+
+
+def groups():
+    # "username" in session
     pass
