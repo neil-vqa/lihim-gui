@@ -1,6 +1,4 @@
-from re import S
-from flask import Flask, current_app, request, jsonify, session, g
-from flask.wrappers import Request
+from flask import Flask, current_app, request, jsonify, session
 from lihim import controller, models
 import functools
 
@@ -54,7 +52,6 @@ def logout():
 @app.route("/api/users", methods=["GET", "POST"])
 def users():
     """Get users list, create a user"""
-
     try:
         if request.method == "GET":
             users = [user.username for user in controller.check_users()]
@@ -74,14 +71,17 @@ def users():
         return jsonify(str(e))
 
 
-@app.route("/api/groups", methods=["GET", "POST"])
+@app.route("/api/groups/", methods=["GET", "POST"])
 @login_required
 def groups():
     """Get groups of current user, create a new group."""
     try:
         current_user = controller.get_user(session["username"])
         if request.method == "GET":
-            groups = [group.name for group in controller.check_groups(current_user)]
+            groups = [
+                {"name": group.name, "id": group.id}
+                for group in controller.check_groups(current_user)
+            ]
             return jsonify(groups)
         elif request.method == "POST":
             request_data = request.get_json()
@@ -89,9 +89,31 @@ def groups():
             controller.create_group(group_name, current_user)
             return jsonify("ok!")
     except Exception as e:
-        return jsonify(e)
+        return jsonify(str(e))
 
 
 @app.route("/api/groups/<int:id>", methods=["GET", "DELETE"])
-def group():
+@login_required
+def group(id):
+    """
+    Get certain group to show its key-value pairs,
+    delete the group.
+    """
+    try:
+        current_user = controller.get_user(session["username"])
+        group_name = request.args["group_name"]
+        if request.method == "GET":
+            pairs = [
+                {"key": pair.key_string, "id": pair.id, "group_id": pair.group_id}
+                for pair in controller.check_group_pairs(group_name, current_user)
+            ]
+            return jsonify(pairs)
+        elif request.method == "DELETE":
+            controller.delete_group(group_name, current_user)
+            return jsonify("ok!")
+    except Exception as e:
+        return jsonify(str(e))
+
+
+def pair():
     pass
