@@ -22,7 +22,7 @@ def hello_world():
 
 @app.route("/api/login", methods=["POST"])
 def login():
-    request_data = request.get_json()
+    request_data = request.json
     username = request_data["username"]
     password = request_data["password"]
     key = request_data["key"]
@@ -57,7 +57,7 @@ def users():
             users = [user.username for user in controller.check_users()]
             return jsonify(users)
         elif request.method == "POST":
-            request_data = request.get_json()
+            request_data = request.json
             username = request_data["username"]
             password = request_data["password"]
             key_path = request_data["key_path"]
@@ -84,7 +84,7 @@ def groups():
             ]
             return jsonify(groups)
         elif request.method == "POST":
-            request_data = request.get_json()
+            request_data = request.json
             group_name = request_data["group_name"]
             controller.create_group(group_name, current_user)
             return jsonify("ok!")
@@ -115,5 +115,31 @@ def group(id):
         return jsonify(str(e))
 
 
-def pair():
-    pass
+@app.route("/api/pairs/", methods=["POST"])
+@login_required
+def pairs():
+    # key: str, value: str, group: str, current_user: User
+    try:
+        if request.method == "POST":
+            pass
+    except Exception as e:
+        return jsonify(str(e))
+
+
+@app.route("/api/pairs/<int:id>", methods=["GET", "DELETE"])
+@login_required
+def pair(id):
+    try:
+        current_user = controller.get_user(session["username"])
+        group_name = request.args["group_name"]
+        key_string = request.args["key_string"]
+        if request.method == "GET":
+            key_file = session["key"]
+
+            pair = controller.load_pair_in_group(group_name, key_string, current_user)
+            value_string = controller.use_key(key_file, decrypt_text=pair.value_string)
+            return jsonify(value_string)
+        elif request.method == "DELETE":
+            pass
+    except Exception as e:
+        return jsonify(str(e))
