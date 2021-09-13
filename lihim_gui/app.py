@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from flask import Flask, current_app, request, jsonify, session
 from lihim import controller, models
 import functools
@@ -13,6 +14,10 @@ def login_required(func):
         return func(*args, **kwargs)
 
     return secure_point
+
+
+def response_content(content: Any) -> Dict[str, Any]:
+    return {"content": content}
 
 
 @app.route("/")
@@ -33,9 +38,9 @@ def login():
         controller.check_key_exists(key)
         session["username"] = username
         session["key"] = key
-        return jsonify("ok!")
+        return jsonify(response_content("ok"))
     except Exception as e:
-        return jsonify(str(e))
+        return jsonify(response_content(str(e)))
 
 
 @app.route("/api/logout", methods=["POST"])
@@ -44,9 +49,9 @@ def logout():
     try:
         session.pop("username", None)
         session.pop("key", None)
-        return jsonify("ok!")
+        return jsonify(response_content("ok"))
     except Exception as e:
-        return jsonify(str(e))
+        return jsonify(response_content(str(e)))
 
 
 @app.route("/api/users", methods=["GET", "POST"])
@@ -55,7 +60,7 @@ def users():
     try:
         if request.method == "GET":
             users = [user.username for user in controller.check_users()]
-            return jsonify(users)
+            return jsonify(response_content(users))
         elif request.method == "POST":
             request_data = request.json
             username = request_data["username"]
@@ -66,9 +71,9 @@ def users():
             key = models.create_key(key_path, key_name, username)
             controller.create_user(username, password, key)
 
-            return jsonify("ok!")
+            return jsonify(response_content("ok"))
     except Exception as e:
-        return jsonify(str(e))
+        return jsonify(response_content(str(e)))
 
 
 @app.route("/api/groups/", methods=["GET", "POST"])
@@ -82,14 +87,14 @@ def groups():
                 {"name": group.name, "id": group.id}
                 for group in controller.check_groups(current_user)
             ]
-            return jsonify(groups)
+            return jsonify(response_content(groups))
         elif request.method == "POST":
             request_data = request.json
             group_name = request_data["group_name"]
             controller.create_group(group_name, current_user)
-            return jsonify("ok!")
+            return jsonify(response_content("ok"))
     except Exception as e:
-        return jsonify(str(e))
+        return jsonify(response_content(str(e)))
 
 
 @app.route("/api/groups/<int:id>", methods=["GET", "DELETE"])
@@ -107,23 +112,33 @@ def group(id):
                 {"key": pair.key_string, "id": pair.id, "group_id": pair.group_id}
                 for pair in controller.check_group_pairs(group_name, current_user)
             ]
-            return jsonify(pairs)
+            return jsonify(response_content(pairs))
         elif request.method == "DELETE":
             controller.delete_group(group_name, current_user)
-            return jsonify("ok!")
+            return jsonify(response_content("ok"))
     except Exception as e:
-        return jsonify(str(e))
+        return jsonify(response_content(str(e)))
 
 
 @app.route("/api/pairs/", methods=["POST"])
 @login_required
 def pairs():
-    # key: str, value: str, group: str, current_user: User
     try:
         if request.method == "POST":
-            pass
+            current_user = controller.get_user(session["username"])
+            key_file = session["key"]
+            request_data = request.json
+
+            key_string = request_data["key_string"]
+            value_string = request_data["value_string"]
+            group_name = request_data["group_name"]
+
+            controller.create_pair(
+                key_string, value_string, group_name, current_user, key_file
+            )
+            return jsonify(response_content("ok"))
     except Exception as e:
-        return jsonify(str(e))
+        return jsonify(response_content(str(e)))
 
 
 @app.route("/api/pairs/<int:id>", methods=["GET", "DELETE"])
@@ -138,8 +153,10 @@ def pair(id):
 
             pair = controller.load_pair_in_group(group_name, key_string, current_user)
             value_string = controller.use_key(key_file, decrypt_text=pair.value_string)
-            return jsonify(value_string)
+            return jsonify(response_content(value_string))
         elif request.method == "DELETE":
-            pass
+            pair = controller.load_pair_in_group(group_name, key_string, current_user)
+            controller.delete_pair(pair, current_user)
+            return jsonify(response_content("ok"))
     except Exception as e:
-        return jsonify(str(e))
+        return jsonify(response_content(str(e)))
