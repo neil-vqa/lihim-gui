@@ -1,16 +1,12 @@
-<script setup>
-import { ref } from "vue";
-
-defineProps({
-  msg: String,
-});
-
-const count = ref(0);
-</script>
-
 <template>
-  <p class="text-2xl font-bold">hi</p>
+  <section>
+    <Login />
+  </section>
 </template>
 
-<style scoped>
-</style>
+<script>
+import Login from "./Login.vue";
+export default {
+  components: { Login },
+};
+</script>
