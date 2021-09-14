@@ -1,9 +1,19 @@
 from typing import Any, Dict
-from flask import Flask, current_app, request, jsonify, session
+from flask import (
+    Flask,
+    request,
+    jsonify,
+    session,
+    render_template,
+)
 from lihim import controller, models
 import functools
 
-app = Flask(__name__, static_folder="prod_app")
+# CORS is only ever needed for development since a separate dev server is used to run the Vue app
+from flask_cors import CORS
+
+app = Flask(__name__)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
 def login_required(func):
@@ -22,7 +32,7 @@ def response_content(content: Any) -> Dict[str, Any]:
 
 @app.route("/")
 def hello_world():
-    return current_app.send_static_file("index.html")
+    return render_template("index.html")
 
 
 @app.route("/api/login", methods=["POST"])
