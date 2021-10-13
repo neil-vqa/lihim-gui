@@ -1,11 +1,5 @@
 from typing import Any, Dict
-from flask import (
-    Flask,
-    request,
-    jsonify,
-    session,
-    render_template,
-)
+from flask import Flask, request, jsonify, session, render_template, abort
 from lihim import controller, models
 import functools
 
@@ -50,7 +44,7 @@ def login():
         session["key"] = key
         return jsonify(response_content("ok"))
     except Exception as e:
-        return jsonify(response_content(str(e)))
+        return abort(401, description=str(e))
 
 
 @app.route("/api/logout", methods=["POST"])
