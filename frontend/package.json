@@ -5,7 +5,10 @@
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "publish": "cp -R ./dist/static ../lihim_gui/static && cp -R ./dist/index.html ../lihim_gui/templates/index.html"
+    "clean": "rm -rf ../lihim_gui/static && rm -rf ../lihim_gui/templates",
+    "create": "mkdir ../lihim_gui/static && mkdir ../lihim_gui/templates",
+    "copy": "cp -R ./dist/static/* ../lihim_gui/static && cp -R ./dist/index.html ../lihim_gui/templates",
+    "publish": "npm run clean && npm run create && npm run copy"
   },
   "dependencies": {
     "axios": "^0.21.4",
